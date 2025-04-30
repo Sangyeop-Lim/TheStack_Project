@@ -51,7 +51,15 @@ public class TheStack : MonoBehaviour
     {
         if (Input.GetMouseButtonDown(0))
         {
-            Spawn_Block();
+            if (PlaceBlock())
+            {
+                Spawn_Block();
+            }
+            else
+            {
+                //게임 오버
+                Debug.Log("Game Over");
+            }
         }
 
         MoveBlock();
@@ -140,5 +148,65 @@ public class TheStack : MonoBehaviour
             lastBlock.localPosition = new Vector3(
                 secondaryPosition, stackCount, -movePosition * MovingBoundSize);
         }
+    }
+
+    bool PlaceBlock()
+    {
+        Vector3 lastPosition = lastBlock.localPosition;
+        
+        if (isMovingX)
+        {
+            float deltax = prevBlockPosition.x - lastPosition.x;
+
+            deltax = Mathf.Abs(deltax);
+            if (deltax > ErrorMargin)
+            {
+                stackBounds.x -= deltax;
+                if (stackBounds.x <= 0)
+                {
+                    return false;
+                }
+
+                float middle = (prevBlockPosition.x + lastPosition.x) / 2f;
+                lastBlock.localScale = new Vector3(stackBounds.x, 1, stackBounds.y);
+
+                Vector3 tempPosition = lastBlock.localPosition;
+                tempPosition.x = middle;
+                lastBlock.localPosition = lastPosition = tempPosition;
+            }
+            else
+            {
+                lastBlock.localPosition = prevBlockPosition + Vector3.up;
+            }
+        }
+        else
+        {
+            float deltaZ = prevBlockPosition.z - lastPosition.z;
+
+            deltaZ = Mathf.Abs(deltaZ);
+            if (deltaZ > ErrorMargin)
+            {
+                stackBounds.y -= deltaZ;
+                if (stackBounds.y <= 0)
+                {
+                    return false;
+                }
+
+                float middle = (prevBlockPosition.z + lastPosition.z) / 2f;
+                lastBlock.localScale = new Vector3(stackBounds.x, 1, stackBounds.y);
+
+                Vector3 tempPositon = lastBlock.localPosition;
+                tempPositon.z = middle;
+                lastBlock.localPosition = lastPosition = tempPositon;
+            }
+            else
+            {
+                lastBlock.localPosition = prevBlockPosition + Vector3.up;
+            }
+        }
+
+        secondaryPosition = (isMovingX) ? lastBlock.localPosition.x : lastBlock.localPosition.z;
+
+        return true;
     }
 }
